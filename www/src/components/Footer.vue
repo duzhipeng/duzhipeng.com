@@ -2,7 +2,7 @@
   <div class="content">
     <a-space direction="vertical" :size="10">
       <a-typography-text type="secondary">
-        &copy; 2023 阿杜 &reg; 保留所有权利
+        &copy; 2024 阿杜 &reg; 保留所有权利
       </a-typography-text>
       <span>
         <a-link href="https://beian.miit.gov.cn/" target="_blank">

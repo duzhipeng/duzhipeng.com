@@ -1,4 +1,35 @@
-# 配置服务器的操作的备忘（v2023.2) {#title .arco-typography}
+---
+title: 配置服务器的操作的备忘（2023.2)
+sections: [ 
+  {id: "system", name: "适用系统"},
+  {id: "environment", name: "更新环境"},
+  {id: "disk", name: "挂载数据盘"},
+  {id: "adduser", name: "增加用户"},
+  {id: "install", name: "安装必要软件"},
+  {id: "nginx", name: "配置 Nginx",sub: [
+    {id: "single", name: "仅前端配置"},
+    {id: "multiple", name: "前后端配置"},        
+    {id: "enable", name: "启用配置"},      
+  ]},
+  {id: "supervisor", name: "配置 Supervisor",sub: [
+    {id: "extension", name: "文件后缀"},      
+    {id: "common", name: "常用命令"},      
+  ]},
+]
+---
+
+<script setup>
+import {defineEmits,onMounted} from "vue";
+
+const emits = defineEmits(["syncMeta"]);
+
+onMounted(()=>{
+    emits("syncMeta", frontmatter);
+    
+})
+</script>
+
+# 配置服务器的操作的备忘（2023.2) {#title .arco-typography}
   因为用 Docker 之于我的需要有些「杀鸡牛刀」，另外一些细节上的原因导致不适用。这样新服务器需要手动配置，故记录一下配置过程以备忘。
   
 ## 适用系统 {#system .arco-typography}
@@ -51,6 +82,9 @@
   cd .ssh
   touch authorized_keys
   cat id_rsa.pub >> authorized_keys
+  # 给密钥配置权限
+  sudo chmod 600 authorized_keys
+  sudo chmod 700 ~/.ssh
 ```
 
 ## 安装必要软件 {#install .arco-typography}
@@ -63,7 +97,7 @@
 ```powershell {.line-numbers .match-braces .rainbow-braces}
   cd /etc/nginx/sites-available
 ```
-  单前端配置参考 {#single}
+  仅前端配置 {#single}
 ```powershell {.line-numbers .match-braces .rainbow-braces}
   server {
         listen 443 ssl;
@@ -106,7 +140,7 @@
         rewrite ^(.*)$ https://${server_name}$1 permanent;
   }
 ```
-  前后端配置参考 {#multiple}
+  前后端配置 {#multiple}
 ```powershell {.line-numbers .match-braces .rainbow-braces}
   server {
         listen 443 ssl;

@@ -1,14 +1,33 @@
-## 0.3.0
-- **修复**：页面布局边距存在问题。 [#6](https://github.com/duzhipeng/duzhipeng.com/issues/6)
-- **更新**：系统依赖（库）更新。 [#5](https://github.com/duzhipeng/duzhipeng.com/issues/5)
+---
+title: 配置服务器的操作的备忘（v2023.2)
+sections: [ 
+  {id: "system", name: "适用系统"},
+  {id: "environment", name: "更新环境"},
+  {id: "disk", name: "挂载数据盘"},
+  {id: "adduser", name: "增加用户"},
+  {id: "install", name: "安装必要软件"},
+  {id: "nginx", name: "配置 Nginx",sub: [
+    {id: "single", name: "仅前端配置"},
+    {id: "multiple", name: "前后端配置"},        
+    {id: "enable", name: "启用配置"},      
+  ]},
+  {id: "supervisor", name: "配置 Supervisor",sub: [
+    {id: "extension", name: "文件后缀"},      
+    {id: "common", name: "常用命令"},      
+  ]},
+]
+---
 
-## 0.2.0
-- **更新**：后端依赖更新。 [#2](https://github.com/duzhipeng/duzhipeng.com/issues/2)
-- **更新**：前端依赖更新。 [#3](https://github.com/duzhipeng/duzhipeng.com/issues/3)
-- **更新**：更新首页。 [#4](https://github.com/duzhipeng/duzhipeng.com/issues/4)
+<script setup>
+import {defineEmits,onMounted} from "vue";
 
-## 0.1.0
-- **全新**：第一个版本。 [#1](https://github.com/duzhipeng/duzhipeng.com/issues/1)
+const emits = defineEmits(["syncMeta"]);
+
+onMounted(()=>{
+    emits("syncMeta", frontmatter);
+    
+})
+</script>
 
 Markdown 目录：
 [TOC]
