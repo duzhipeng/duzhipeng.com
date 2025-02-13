@@ -14,7 +14,7 @@
         <div class="card card-type-A">
           <a-space direction="vertical" :size="3">
             <a-typography-text class="title"> ✉️ </a-typography-text>
-            <a-typography-text copyable>DUZHIPENG@ME.COM</a-typography-text>
+            <a-typography-text copyable>MAIL@DUZHIPENG.COM</a-typography-text>
             <a-link
               href="https://keys.openpgp.org/vks/v1/by-fingerprint/1C5E38AEB5BEBAFEB6BCC9D0F3C82540B55E0FEA"
               target="_blank"

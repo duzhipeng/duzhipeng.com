@@ -34,9 +34,6 @@
       <a-breadcrumb-item>
         <a-link href="/"> 首页 </a-link>
       </a-breadcrumb-item>
-      <a-breadcrumb-item>
-        <a-link href="/paper"> 研究 </a-link>
-      </a-breadcrumb-item>
       <a-breadcrumb-item> {{ meta.title }} </a-breadcrumb-item>
     </a-breadcrumb>
   </div>
