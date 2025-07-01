@@ -95,14 +95,17 @@
                 <a-divider type="dashed" :margin="3" />
               </template>
               <a-typography-text>
+                <a-link href="/paper/cloudflare_r2_workers" icon>
+                  在中国使用 Cloudflare R2 服务的正确方式之一（2025.3)
+                </a-link>
+              </a-typography-text>
+              <a-typography-text>
                 <a-link href="/paper/hukou" icon> 上海落户记（2023.7) </a-link>
-                <!--                - 成果-->
               </a-typography-text>
               <a-typography-text>
                 <a-link href="/paper/server_config" icon>
                   配置服务器的操作的备忘（2023.2)
                 </a-link>
-                <!--                - 成果-->
               </a-typography-text>
             </a-space>
           </div>

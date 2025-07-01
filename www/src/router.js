@@ -4,6 +4,7 @@ const Index = () => import("./pages/Index.vue");
 const Paper = () => import("./pages/Paper.vue");
 const ServerConfig = () => import("./pages/papers/ServerConfig.md");
 const HukouOfShanghai = () => import("./pages/papers/HukouOfShanghai.md");
+const CloudflareR2Worker = () => import("./pages/papers/CloudflareR2Worker.md");
 
 const routes = [
   {
@@ -23,11 +24,11 @@ const routes = [
     },
     children: [
       {
-        path: "server_config",
-        name: "ServerConfig",
-        component: ServerConfig,
+        path: "cloudflare_r2_workers",
+        name: "CloudflareR2Worker",
+        component: CloudflareR2Worker,
         meta: {
-          title: "配置服务器的操作的备忘（2023.01)",
+          title: "在中国使用 Cloudflare R2 服务的正确方式之一（2025.3)",
         },
       },
       {
@@ -36,6 +37,14 @@ const routes = [
         component: HukouOfShanghai,
         meta: {
           title: "上海落户记（2023.7)",
+        },
+      },
+      {
+        path: "server_config",
+        name: "ServerConfig",
+        component: ServerConfig,
+        meta: {
+          title: "配置服务器的操作的备忘（2023.2)",
         },
       },
     ],
