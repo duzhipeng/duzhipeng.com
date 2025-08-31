@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- CSS CUSTOMIZATION SECTION -->
+    <style>
+        /* PAGE SETUP - Controls print layout and margins */
+        @page {
+            /* A4 size is default but some web-browsers do not offer "Scale" option if A4 is set explicitly */
+            /* Uncomment to force A4 paper size: */
+            /*
+      size: A4;
+      */
+
+            /* Page margins - adjust these for more/less white space around content */
+            margin: 20mm;
+
+            /* Uncomment if you want page number in the footer */
+            /*
+      @bottom-center {
+        content: counter(page);
+        font-size: 0.8em;
+      }
+      */
+        }
+
+        /* CSS RESET - Ensures consistent styling across browsers */
+        *, ::after, ::before, ::backdrop, ::file-selector-button {
+            margin: 0;
+            padding: 0;
+        }
+
+        *, ::after, ::before, ::backdrop, ::file-selector-button {
+            box-sizing: border-box;
+            border: 0 solid;
+        }
+
+        /* BODY STYLES - Main document styling */
+        body {
+            margin: 0;
+            padding: 30px; /* Space around document content */
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Change font family here */
+            color: #171717; /* Main text color */
+            font-size: 12px; /* Base font size for document */
+            line-height: 1.428571429;
+            min-width: 800px; /* Minimum width to prevent layout breaking */
+        }
+
+        /* ADDRESS STYLING - For business and recipient addresses */
+        address {
+            font-style: normal; /* Remove italic styling */
+            line-height: 1.5em;
+        }
+
+        /* DEFINITION LIST STYLING - Used for invoice fields (date, number, etc.) */
+        dt {
+            font-weight: bold;
+            margin: 0 0 2px 0; /* Small gap below label */
+        }
+
+        dd {
+            margin: 0 0 16px 0; /* Bigger gap below value */
+        }
+
+        dd:last-of-type {
+            margin-bottom: 0; /* No gap after last pair */
+        }
+
+        /* PRINT STYLES - Applied when printing or generating PDF */
+        @media print {
+            body {
+                padding: 0; /* Remove padding for print */
+                min-width: auto; /* Allow natural width for print */
+            }
+        }
+
+        /* TABLE STYLES - Main table containing line items */
+        table {
+            font-size: 12px;
+            width: 100%;
+        }
+
+        /* TABLE HEADERS - Column headers for the line items table */
+        tr#table-headers th {
+            font-weight: bold;
+            padding: 5px 10px; /* Cell padding */
+            border: 1px solid #000; /* Header border color */
+            text-align: start
+        }
+
+        /* TABLE CELLS - Basic cell styling */
+        tbody#table-rows td {
+            padding: 5px 10px; /* Cell padding */
+            text-align: start;
+            vertical-align: top
+        }
+
+        /* LINE ITEM ROWS - Styling for each line item */
+        tbody#table-rows tr.row td {
+            border-left: 1px solid #000; /* Side borders for cells */
+            border-right: 1px solid #000;
+        }
+
+        /* LAST ROW - Special styling for the last line item */
+        tbody#table-rows tr.last-row td {
+            padding-bottom: 30px; /* Extra space before totals */
+            border-bottom: 1px solid #000; /* Bottom border */
+        }
+
+        /* COLUMN TOTALS - Sum row at bottom of columns (if enabled) */
+        tbody#table-rows tr.column-total td {
+            font-weight: bold;
+            border: 1px solid #000;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        /* TOTALS SECTION - Subtotal, tax, total rows */
+        tbody#table-rows tr.total td {
+            white-space: nowrap; /* Prevent line breaks */
+        }
+
+        /* TOTAL LABELS - Right-aligned labels (e.g., "Subtotal:") */
+        tbody#table-rows tr.total td:first-child {
+            text-align: end;
+        }
+
+        /* TOTAL VALUES - Amount cells with border */
+        tbody#table-rows tr.total td:last-child {
+            border: 1px solid #000; /* Border around amounts */
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+<!-- MAIN LAYOUT TABLE - Used to ensure proper page breaks and header repetition -->
+<table>
+    <thead>
+    <!-- REPEATING HEADER SECTION -->
+    <!-- The contents of the <thead> element will automatically repeat at the top of each printed page -->
+    <!-- If you want anything here not to repeat on every page, move the relevant blocks into <tbody> -->
+    <tr>
+        <td>
+            <!-- DOCUMENT HEADER - Title and logo -->
+            <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px">
+                <!-- Document title (e.g., "Tax Invoice") - populated by JavaScript -->
+                <h1 id="title" style="font-size: 32px; line-height: 32px; font-weight: bold"></h1>
+                <!-- Business logo container - image will be inserted here -->
+                <div id="business-logo" style="text-align: end"></div>
+            </header>
+
+            <!-- INFO SECTION - Recipient, fields, and business details -->
+            <section style="display: flex; margin-bottom: 20px; width: 100%; align-items: flex-start; gap: 20px">
+                <!-- Recipient/customer address (left side) -->
+                <address id="recipient-info" style="flex: 1"></address>
+                <!-- Document fields (invoice number, date, etc.) - middle -->
+                <dl id="fields" style="flex: 1; text-align: end"></dl>
+                <!-- Vertical separator line -->
+                <div aria-hidden="true" style="width: 1px; border-left: 1px solid #000; align-self: stretch "></div>
+                <!-- Business address (right side) -->
+                <address id="business-info" style="white-space: nowrap"></address>
+            </section>
+
+            <!-- Optional description line (e.g., "Professional services") -->
+            <p style="font-weight: bold; font-size: 14px; margin-bottom: 20px" id="description"></p>
+        </td>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- NON-REPEATING CONTENT SECTION -->
+    <tr>
+        <td>
+            <!-- MAIN LINE ITEMS TABLE -->
+            <!-- This table contains column headers, line items, and totals -->
+            <table style="border-collapse: collapse; width: 100%">
+                <thead>
+                <!-- Table headers row - populated dynamically by JavaScript -->
+                <tr id="table-headers"></tr>
+                </thead>
+                <tbody id="table-rows">
+                <!-- Line items and totals will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+
+            <!-- QR CODE SECTION - For special features like Saudi Arabia e-invoicing -->
+            <script src="resources/qrcode/qrcode.js"></script>
+            <div id="qrcode" style="margin-bottom: 20px"></div>
+
+            <!-- CUSTOM FIELDS SECTION - Notes, terms, and other custom content -->
+            <div id="custom-fields"></div>
+
+            <!-- FOOTERS SECTION - Can contain HTML or custom scripts -->
+            <table><tr><td><div id="footers"></div></td></tr></table>
+
+            <!-- STATUS SECTION - For stamps like PAID, VOID, CANCELLED -->
+            <div id="status" style="text-align: center"></div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- JAVASCRIPT SECTION - Handles dynamic content population -->
+<script>
+    /**
+     * Sends resize message to parent frame when content changes
+     * This ensures the iframe container adjusts to content height
+     */
+    function sendResize() {
+        window.parent.postMessage({
+            type: "resize",
+            width: document.documentElement.scrollWidth + 1,
+            height: document.documentElement.scrollHeight + 1
+        }, "*");
+    }
+
+    /**
+     * Main message listener - receives document data from parent frame
+     * The parent sends all invoice/document data via postMessage
+     */
+    window.addEventListener("message", (event) => {
+
+        // Security: Only accept messages from parent frame
+        if (event.source !== window.parent) return;
+        // Only process context-response messages
+        if (event.data.type !== 'context-response') return;
+
+        // Extract the main data object sent from parent
+        // This contains all document information (business, recipient, items, etc.)
+        const data = event.data.body;
+
+        // Set text direction (LTR or RTL) based on language settings
+        document.documentElement.dir = data.direction;
+
+        /* OPTIONAL: Add document title to page headers for printing
+  const style = document.createElement('style');
+  style.textContent = `@page { @top-center { content: '${data.title}'; }}`;
+  document.head.appendChild(style);
+  */
+
+        // Set browser tab title - combines business name, document type, and reference
+        document.title = [data?.business?.name, data?.title, data?.reference].filter(Boolean).join(' - ');
+
+        // POPULATE DOCUMENT HEADER
+        // Set document title (e.g., "Sales Invoice", "Purchase Order")
+        document.getElementById("title").innerHTML = data.title || "No title";
+        // Set description line (optional subtitle)
+        document.getElementById("description").innerHTML = data.description || "";
+
+        // BUSINESS LOGO
+        // Insert business logo if available
+        var businessLogoTd = document.getElementById("business-logo");
+        if (data.business.logo) {
+            const img = document.createElement("img");
+            img.addEventListener("load", sendResize); // Resize iframe when logo loads
+            img.src = data.business.logo;
+            // Customize logo size constraints here
+            img.style = "max-height: 150px; max-width: 300px; display: inline";
+            businessLogoTd.appendChild(img);
+        }
+
+        // BUSINESS INFO SECTION (right side)
+        // Display business name and address
+        const business = data.business || {};
+        document.getElementById("business-info").innerHTML = `<strong>${business.name || ""}</strong><br>${business.address ? business.address.replace(/\n/g, "<br>") : ""}`;
+
+        // RECIPIENT INFO SECTION (left side)
+        // Display customer/supplier name and address
+        const recipient = data.recipient || {};
+        document.getElementById("recipient-info").innerHTML = `<strong>${recipient.name || ""}</strong><br>${recipient.address ? recipient.address.replace(/\n/g, "<br>") : ""}`;
+
+        // DOCUMENT FIELDS (middle section)
+        // These are key-value pairs like Invoice Number, Date, Due Date, etc.
+        const fieldsDiv = document.getElementById("fields");
+        fieldsDiv.innerHTML = "";
+        (data.fields || []).forEach(f => {
+            const dt = document.createElement("dt"); // Label
+            dt.innerHTML = f.label;
+            const dd = document.createElement("dd"); // Value
+            dd.innerHTML = f.text;
+            fieldsDiv.appendChild(dt);
+            fieldsDiv.appendChild(dd);
+        });
+
+        // TABLE HEADERS
+        // Build column headers dynamically based on data.table.columns
+        const headersRow = document.getElementById("table-headers");
+        headersRow.innerHTML = "";
+        (data.table.columns || []).forEach(col => {
+            const th = document.createElement("th");
+            th.innerHTML = col.label; // Column header text
+            th.style.textAlign = col.align; // left, center, or right
+
+            // Column width options:
+            if (col.minWidth) {
+                // Minimum width column (typically for numbers)
+                th.style.whiteSpace = 'nowrap';
+                th.style.width = '1px';
+            }
+            else if (col.nowrap) {
+                // No-wrap column with fixed width
+                th.style.whiteSpace = 'nowrap';
+                th.style.width = '80px';
+            }
+            headersRow.appendChild(th);
+        });
+
+        // LINE ITEMS
+        // Populate table with line items (products, services, etc.)
+        const rowsBody = document.getElementById("table-rows");
+        rowsBody.innerHTML = "";
+        (data.table.rows || []).forEach(row => {
+            const tr = document.createElement("tr");
+            tr.className = 'row'; // Apply row styling
+
+            // Create cells for each column
+            row.cells.forEach((cell, i) => {
+                var col = data.table.columns[i]; // Get column definition
+                const td = document.createElement("td");
+                // Convert newlines to HTML line breaks
+                td.innerHTML = (cell.text || "").split("\n").join("<br />");
+                // Apply column alignment
+                td.style.textAlign = col.align;
+
+                // Apply column width settings
+                if (col.minWidth) {
+                    td.style.whiteSpace = 'nowrap';
+                    td.style.width = '1px';
+                }
+                else if (col.nowrap) {
+                    td.style.whiteSpace = 'nowrap';
+                    td.style.width = '80px';
+                }
+                tr.appendChild(td);
+            });
+            rowsBody.appendChild(tr);
+        });
+
+        // MARK LAST ROW
+        // Add special styling to the last line item row
+        const rows = rowsBody.querySelectorAll('tr.row');
+        if (rows.length > 0) {
+            const lastRow = rows[rows.length - 1];
+            lastRow.classList.add('last-row'); // Adds bottom border and extra padding
+        }
+
+        // COLUMN TOTALS ROW (optional)
+        // Shows sum of numeric columns if configured
+        const tr = document.createElement("tr");
+        tr.classList.add('column-total');
+        (data.table.columns || []).forEach(col => {
+            const td = document.createElement("td");
+            td.style.textAlign = col.align;
+            td.innerHTML = col.sumText; // Column sum if applicable
+            tr.appendChild(td);
+        });
+        // Only add row if it has content
+        if (tr.innerText) rowsBody.appendChild(tr);
+
+        // TOTALS SECTION
+        // Display subtotal, taxes, discounts, and grand total
+        (data.table.totals || []).forEach(total => {
+            const tr = document.createElement("tr");
+            tr.className = 'total';
+
+            // Label cell (e.g., "Subtotal:", "Tax:", "Total:")
+            const tdLabel = document.createElement("td");
+            tdLabel.innerHTML = total.label;
+            tdLabel.colSpan = data.table.columns.length - 1; // Span all columns except last
+
+            // Value cell (the amount)
+            const tdValue = document.createElement("td");
+            tdValue.innerHTML = total.text; // Formatted amount
+            tdValue.id = total.key; // ID for targeting specific totals (e.g., 'Total')
+            if (total.class) tdValue.classList.add(total.class); // CSS class (e.g., 'taxAmount')
+            tdValue.dataset.value = total.number; // Raw numeric value for calculations
+
+            // Bold formatting for important totals
+            if (total.emphasis) {
+                tdLabel.style.fontWeight = 'bold';
+                tdValue.style.fontWeight = 'bold';
+            }
+            tr.appendChild(tdLabel);
+            tr.appendChild(tdValue);
+            rowsBody.appendChild(tr);
+        });
+
+        // CUSTOM FIELDS
+        // Display custom fields like notes, terms, payment instructions, etc.
+        const customFieldsDiv = document.getElementById("custom-fields");
+        customFieldsDiv.innerHTML = "";
+        (data.custom_fields || []).forEach(f => {
+            // Some custom fields can be displayed at the top with other document fields
+            if (f.displayAtTheTop) {
+                // Add to the fields section at the top of document
+                const dt = document.createElement("dt");
+                dt.innerHTML = f.label;
+                const dd = document.createElement("dd");
+                dd.innerHTML = f.text;
+                fieldsDiv.appendChild(dt);
+                fieldsDiv.appendChild(dd);
+            }
+            else {
+                // Display as a labeled section below the table
+                const div = document.createElement("div");
+                div.innerHTML = `<strong>${f.label || ""}</strong><br />${(f.text || "").split("\n").join("<br />")}<br /><br />`;
+                customFieldsDiv.appendChild(div);
+            }
+        });
+
+        // FOOTERS SECTION
+        // Custom HTML footers - can contain signatures, scripts, or other content
+        const footersDiv = document.getElementById("footers");
+        footersDiv.innerHTML = "";
+        (data.footers || []).forEach(f => {
+            const div = document.createElement("div");
+            div.style = 'margin-top: 20px';
+            div.innerHTML = f; // Raw HTML content
+            footersDiv.appendChild(div);
+
+            // SCRIPT EXECUTION IN FOOTERS
+            // Footers may contain <script> tags that need to be executed
+            const scripts = div.querySelectorAll("script");
+            scripts.forEach(script => {
+                // Create new script element (required for execution)
+                const newScript = document.createElement("script");
+
+                // Copy all attributes from original script
+                for (const attr of script.attributes) {
+                    newScript.setAttribute(attr.name, attr.value);
+                }
+
+                // Copy script content
+                if (script.textContent) {
+                    newScript.textContent = script.textContent;
+                }
+
+                // Replace old script with new one to trigger execution
+                script.parentNode.replaceChild(newScript, script);
+            });
+        });
+
+        // STATUS STAMP
+        // Display status label (e.g., PAID, CANCELLED, VOID) with colored border
+        const statusDiv = document.getElementById("status");
+        if (data.emphasis?.text != null) {
+            statusDiv.style.marginTop = '40px';
+            const span = document.createElement("span");
+            // Default red border style
+            span.style = 'border-width: 5px; border-color: #FF0000; border-style: solid; padding: 10px; font-size: 20px; text-transform: uppercase';
+
+            // Green for positive status (e.g., PAID)
+            if (data.emphasis.positive) {
+                span.style.color = 'green';
+                span.style.borderColor = 'green';
+            }
+            // Red for negative status (e.g., CANCELLED, VOID)
+            if (data.emphasis.negative) {
+                span.style.color = 'red';
+                span.style.borderColor = 'red';
+            }
+            span.innerHTML = data.emphasis.text;
+            statusDiv.appendChild(span);
+        }
+
+        // SAUDI ARABIA QR CODE (E-INVOICING)
+        // Special QR code required for Saudi Arabian tax compliance
+        // NOTE: This is a temporary implementation - will be improved in future versions
+        if (data.legacyQrCodeForSaudiArabia) {
+            /**
+             * Encodes data in TLV (Tag-Length-Value) format for QR code
+             */
+            function appendTLV(tag, text, byteList) {
+                const encoded = new TextEncoder().encode(text);
+                byteList.push(tag);
+                byteList.push(encoded.length);
+                for (let b of encoded) byteList.push(b);
+            }
+
+            const byteList = [];
+
+            // Extract business name
+            let businessName = 'No name';
+            if (data.business) businessName = data.business.name;
+
+            // Extract VAT number from custom fields
+            let vatNumber = '0000000000000';
+            let vatField = data.business.custom_fields.find(item => item.key === "d96d97e8-c857-42c6-8360-443c06a13de9");
+            if (vatField) vatNumber = vatField.text;
+
+            // Convert .NET ticks to JavaScript date
+            let timestamp = new Date((data.timestamp - 621355968000000000) / 10000).toISOString();
+
+            // Get total amount from the Total element
+            let total = 0;
+            let totalElement = document.getElementById('Total');
+            if (totalElement != null) total = parseFloat(totalElement.getAttribute('data-value'));
+
+            // Calculate total VAT from all tax amount elements
+            let vat = 0;
+            let taxAmounts = document.getElementsByClassName('taxAmount');
+            for (let i = 0; i < taxAmounts.length; i++) {
+                vat += parseFloat(taxAmounts[i].getAttribute('data-value'));
+            }
+
+            // Build TLV data structure as per Saudi requirements
+            appendTLV(1, businessName, byteList);      // Seller name
+            appendTLV(2, vatNumber, byteList);         // VAT registration number
+            appendTLV(3, timestamp, byteList);         // Invoice timestamp
+            appendTLV(4, total.toFixed(2), byteList);  // Total amount with VAT
+            appendTLV(5, vat.toFixed(2), byteList);    // Total VAT amount
+
+            // Convert to Uint8Array
+            const tlvBytes = Uint8Array.from(byteList);
+
+            // Convert to Base64 for QR code
+            const qrData = btoa(String.fromCharCode(...tlvBytes));
+
+            // Generate QR code
+            new QRCode(document.getElementById("qrcode"), {
+                text: qrData,
+                width: 128,
+                height: 128,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.L
+            });
+        }
+
+        // Notify parent frame of content size after rendering
+        sendResize();
+    }, false);
+
+    /**
+     * Initialize communication with parent frame
+     * Requests document data when page loads
+     */
+    window.addEventListener("load", () =>
+        window.parent.postMessage({ type: "context-request" }, "*")
+    );
+</script>
+
+</body>
+</html>
