@@ -5,6 +5,7 @@ const Paper = () => import("./pages/Paper.vue");
 const ServerConfig = () => import("./pages/papers/ServerConfig.md");
 const HukouOfShanghai = () => import("./pages/papers/HukouOfShanghai.md");
 const CloudflareR2Worker = () => import("./pages/papers/CloudflareR2Worker.md");
+const Test = () => import("./pages/test.vue");
 
 const routes = [
   {
